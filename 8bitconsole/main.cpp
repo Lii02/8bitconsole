@@ -52,6 +52,13 @@ int main(int argc, char** argv)
 	memset(status_buffer, 0, 8);
 
 	render_buffer* test_buffer = create_render_buffer(CONSOLE_RESX, CONSOLE_RESY, 3);
+	for (int x = 0; x < 100; x++)
+	{
+		for (int y = 0; y < 100; y++)
+		{
+			put_pixel(test_buffer, x, y, 0xA5);
+		}
+	}
 	
 	while (window_running(window))
 	{
@@ -61,7 +68,7 @@ int main(int argc, char** argv)
 		vram_editor.DrawWindow("VRAM", vram, VRAM);
 		rom_editor.DrawWindow("ROM", file->bytes, file->length);
 
-		ImGui::Begin("Registers");
+		ImGui::Begin("CPU Info");
 		ImGui::Text("A: $%x", registers[ACCUMULATOR_REGISTER].r8);
 		ImGui::Text("X: $%x Y: $%x", registers[INDEXX_REGISTER].r8, registers[INDEXY_REGISTER].r8);
 		ImGui::Text("PC: $%x", registers[PROGRAM_COUNTER].r8);
@@ -69,6 +76,8 @@ int main(int argc, char** argv)
 		ImGui::Text("SP: $%x", *(registers[STACK_PTR].r8_ptr));
 		itoa(registers[STATUS_FLAG_REGISTER].r8, status_buffer, 2);
 		ImGui::Text("S: %s", status_buffer);
+		float memory_usage = (get_memory_allocated() / 1024);
+		ImGui::Text("Memory allocated: %.4f KB", memory_usage);
 		ImGui::End();
 
 		glDrawPixels(test_buffer->width, test_buffer->height, GL_RGB, GL_UNSIGNED_BYTE, test_buffer->buffer);
@@ -82,6 +91,7 @@ int main(int argc, char** argv)
 	free_input_file(file);
 	free_eeprom(rom);
 	free_cpu();
+	free_ppu();
 	free_window(window);
 	return 0;
 }

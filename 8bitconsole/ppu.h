@@ -14,11 +14,12 @@
 #define PPUSCROLL vram[0x1]
 #define PPUMASK vram[0x2]
 
+// 0-255 color
 typedef struct
 {
-	float r;
-	float g;
-	float b;
+	int32_t r;
+	int32_t g;
+	int32_t b;
 } ppu_rgb_color;
 
 struct render_buffer
@@ -38,6 +39,6 @@ void ppu_write(uint16_t address, uint8_t val);
 uint8_t ppu_read(uint16_t address);
 render_buffer* create_render_buffer(int32_t width, int32_t height, int8_t bpp);
 void free_render_buffer(render_buffer* b);
-void put_pixel(render_buffer* buff, int32_t x, int32_t y, int32_t r, int32_t g, int32_t b);
+void put_pixel(render_buffer* buff, int32_t x, int32_t y, ppu_color color);
 
 #endif

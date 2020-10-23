@@ -1,7 +1,7 @@
 #ifndef BIT_MEMORY_H
 #define BIT_MEMORY_H
 
-void initialize_memory(void);
+void initialize_memory();
 size_t get_memory_allocated();
 
 void* li_malloc(unsigned int size);
