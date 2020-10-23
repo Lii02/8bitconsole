@@ -2,6 +2,8 @@
 #define OPCODE_H
 #include <stdint.h>
 
+#define ROM_SIGNATURE 0x6C756B65
+
 // Registers
 #define REGISTER_COUNT 0x8
 #define INDEX_PTR 0x0

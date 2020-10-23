@@ -4,8 +4,6 @@
 #include <stdint.h>
 #include "io.h"
 
-#define ROM_SIGNATURE 0x6C756B65
-
 // The EEPROM header is to be written in big endian
 typedef struct 
 {
