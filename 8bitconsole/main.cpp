@@ -50,6 +50,8 @@ int main(int argc, char** argv)
 	rom_editor.ReadOnly = true;
 	char* status_buffer = (char*)li_malloc(8);
 	memset(status_buffer, 0, 8);
+
+	render_buffer* test_buffer = create_render_buffer(CONSOLE_RESX, CONSOLE_RESY, 3);
 	
 	while (window_running(window))
 	{
@@ -69,11 +71,14 @@ int main(int argc, char** argv)
 		ImGui::Text("S: %s", status_buffer);
 		ImGui::End();
 
+		glDrawPixels(test_buffer->width, test_buffer->height, GL_RGB, GL_UNSIGNED_BYTE, test_buffer->buffer);
+
 		cpu_process(rom->header.prgm_size, rom);
 		
 		update_window(window);
 	}
 
+	free_render_buffer(test_buffer);
 	free_input_file(file);
 	free_eeprom(rom);
 	free_cpu();

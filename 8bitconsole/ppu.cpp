@@ -38,3 +38,25 @@ void free_ppu()
 {
 	li_free(vram);
 }
+
+render_buffer* create_render_buffer(int32_t width, int32_t height, int8_t bpp)
+{
+	render_buffer* buffer = (render_buffer*)li_malloc(sizeof(render_buffer));
+	int32_t s = width * height * bpp;
+	buffer->buffer = (uint8_t*)li_malloc(s);
+	memset(buffer->buffer, 0, sizeof(s));
+	buffer->width = width;
+	buffer->height = height;
+	buffer->bpp = bpp;
+	return buffer;
+}
+
+void free_render_buffer(render_buffer* b)
+{
+	li_free(b->buffer);
+	li_free(b);
+}
+
+void put_pixel(render_buffer* buff, int32_t x, int32_t y, int32_t r, int32_t g, int32_t b)
+{
+}
