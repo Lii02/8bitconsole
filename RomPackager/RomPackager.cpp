@@ -49,7 +49,7 @@ int main(int argc, char** argv)
 
 	char* byte_filep = argv[1];
 	input_file* bytefile = read_file(byte_filep);
-	if (!byte_filep)
+	if (!bytefile)
 	{
 		printf("%s failed to load!\n", byte_filep);
 		exit(0);
@@ -63,21 +63,23 @@ int main(int argc, char** argv)
 	}
 	char* output_filep = argv[3];
 
-	free_input_file(bytefile);
-	free_input_file(chr_file);
-
 	FILE* write_ptr = fopen(output_filep, "wb");
-	int32_t sig = ROM_SIGNATURE;
+	int32_t sig = 0x656B756C;
 	WRITE_TO_PTR((Byte*)&sig, 4);
 
 	WRITE_TO_PTR((Byte*)&bytefile->length, 4);
-	WRITE_TO_PTR((Byte*)&chr_file->length, 4);
+	int32_t test_chr_length = 0;
+	WRITE_TO_PTR((Byte*)&test_chr_length, 4);
 	int16_t ram_ext = 0;
 	WRITE_TO_PTR((Byte*)&ram_ext, 2);
+	int16_t entry_point = 0;
+	WRITE_TO_PTR((Byte*)&entry_point, 2);
 
 	WRITE_TO_PTR(bytefile->bytes, bytefile->length);
-	WRITE_TO_PTR(chr_file->bytes, chr_file->length);
+	//WRITE_TO_PTR(chr_file->bytes, chr_file->length);
 
 	printf("Wrote %d bytes into %s", ftell(write_ptr), output_filep);
+	free_input_file(bytefile);
+	free_input_file(chr_file);
 	return 0;
 }

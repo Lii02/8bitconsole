@@ -80,7 +80,7 @@ int main(int argc, char** argv)
 		ImGui::Text("Memory allocated: %.4f KB", memory_usage);
 		ImGui::End();
 
-		glDrawPixels(test_buffer->width, test_buffer->height, GL_RGB, GL_UNSIGNED_BYTE, test_buffer->buffer);
+		draw_buffer(test_buffer);
 
 		cpu_process(rom->header.prgm_size, rom);
 		

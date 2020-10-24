@@ -68,3 +68,8 @@ void put_pixel(render_buffer* buff, int32_t x, int32_t y, ppu_color color)
 		buff->buffer[position + 2] = (uint8_t)col.b;
 	}
 }
+
+void draw_buffer(render_buffer* buff)
+{
+	glDrawPixels(buff->width, buff->height, GL_RGB, GL_UNSIGNED_BYTE, buff->buffer);
+}

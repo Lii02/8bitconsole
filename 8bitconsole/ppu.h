@@ -40,5 +40,6 @@ uint8_t ppu_read(uint16_t address);
 render_buffer* create_render_buffer(int32_t width, int32_t height, int8_t bpp);
 void free_render_buffer(render_buffer* b);
 void put_pixel(render_buffer* buff, int32_t x, int32_t y, ppu_color color);
+void draw_buffer(render_buffer* buff);
 
 #endif

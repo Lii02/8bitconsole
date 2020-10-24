@@ -56,9 +56,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="mem\memory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="io.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -99,6 +96,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ppu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mem\memory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
