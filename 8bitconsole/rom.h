@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include "io.h"
 
-// The EEPROM header is to be written in big endian
+// The EEPROM header is to be written in big endian, and is exactly 16 bytes
 typedef struct 
 {
 	uint32_t signature;

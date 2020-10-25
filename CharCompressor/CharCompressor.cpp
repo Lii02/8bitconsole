@@ -37,19 +37,19 @@ int main(int argc, char** argv)
 		FreeImage_DeInitialise();
 		exit(0);
 	}
-	else if (fif != FIF_BMP)
-	{
-		printf("%s is not a bitmap!\n", filename);
-		FreeImage_Unload(dib);
-		FreeImage_DeInitialise();
-		exit(0);
-	}
 
 	char* output_file = argv[2];
 	FILE* write_ptr;
 	write_ptr = fopen(output_file, "wb");
 	
 	uint32_t data_length = FreeImage_GetDIBSize(dib);
+	if (FreeImage_GetBPP(dib) != 8)
+	{
+		FIBITMAP* dib8bit = FreeImage_ConvertTo8Bits(dib);
+		img = FreeImage_GetBits(dib8bit);
+		data_length = FreeImage_GetDIBSize(dib8bit);
+	}
+
 	fwrite(img, data_length, 1, write_ptr);
 
 	printf("Wrote %d bytes\n", ftell(write_ptr));

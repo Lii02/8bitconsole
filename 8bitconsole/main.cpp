@@ -10,6 +10,7 @@
 #include "cpu/xcpu.h"
 #include "glfw/emulator_window.h"
 #include "ppu.h"
+#include "ic.h"
 
 #pragma comment(lib, "opengl32.lib")
 #pragma comment(lib, "glfw3.lib")
@@ -41,25 +42,29 @@ int main(int argc, char** argv)
 
 	initialize_cpu();
 	set_stack();
-	initialize_ppu();
-
 	eeprom* rom = load_eeprom(file);
 	extend_stack(rom->header.ram_ext);
+	initialize_ppu();
+	glEnable(GL_TEXTURE_2D);
 
+	render_buffer* main_buffer = create_render_buffer(CONSOLE_RESX, CONSOLE_RESY);
+	
 	MemoryEditor ram_editor, rom_editor, vram_editor;
 	rom_editor.ReadOnly = true;
 	char* status_buffer = (char*)li_malloc(8);
 	memset(status_buffer, 0, 8);
+	
+	PPUBUFFID = main_buffer->id;
 
-	render_buffer* test_buffer = create_render_buffer(CONSOLE_RESX, CONSOLE_RESY, 3);
-	for (int x = 0; x < 100; x++)
+	for (int x = 0; x < 512; x++)
 	{
-		for (int y = 0; y < 100; y++)
+		for (int y = 0; y < 512; y++)
 		{
-			put_pixel(test_buffer, x, y, 0xA5);
+			put_pixel(main_buffer, x, y, rand() % 0xFF);
 		}
 	}
-	
+	update_render_buffer(main_buffer);
+
 	while (window_running(window))
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -76,18 +81,15 @@ int main(int argc, char** argv)
 		ImGui::Text("SP: $%x", *(registers[STACK_PTR].r8_ptr));
 		itoa(registers[STATUS_FLAG_REGISTER].r8, status_buffer, 2);
 		ImGui::Text("S: %s", status_buffer);
-		float memory_usage = (get_memory_allocated() / 1024);
-		ImGui::Text("Memory allocated: %.4f KB", memory_usage);
 		ImGui::End();
 
-		draw_buffer(test_buffer);
-
-		cpu_process(rom->header.prgm_size, rom);
+		ppu_render();
+		cpu_process(rom);
 		
 		update_window(window);
 	}
 
-	free_render_buffer(test_buffer);
+	free_render_buffer(main_buffer);
 	free_input_file(file);
 	free_eeprom(rom);
 	free_cpu();

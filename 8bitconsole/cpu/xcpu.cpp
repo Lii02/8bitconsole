@@ -100,7 +100,7 @@ void CPU_ST_STACK(uint8_t id)
 {
 	INCREASE_IP(1);
 	uint16_t addr = swap_2_bytes(EEPROM_GET_SHORT());
-	if (addr > (INTERNAL_RAM - 1))
+	if (addr > (INTERNAL_RAM - 1) && addr < (VRAM - 1))
 	{
 		ppu_write(addr - INTERNAL_RAM, registers[id].r8);
 	}
@@ -160,12 +160,12 @@ void CPU_RET(eeprom* rom)
 	SET_INDEX_AFTER_HEADER(rom, addr);
 }
 
-void CPU_PRINTF()
+void CPU_COUT()
 {
 	INCREASE_IP(1);
 	uint16_t addr = swap_2_bytes(EEPROM_GET_SHORT());
 	uint8_t b = 0;
-	if (addr > (INTERNAL_RAM - 1))
+	if (addr > (INTERNAL_RAM - 1) && addr < (VRAM - 1))
 	{
 		b = ppu_read(addr - INTERNAL_RAM);
 	}
@@ -176,9 +176,9 @@ void CPU_PRINTF()
 	putchar(b);
 }
 
-void cpu_process(int32_t cycles, eeprom* rom)
+void cpu_process(eeprom* rom)
 {
-	while (registers[PROGRAM_COUNTER].r16 < cycles)
+	while (registers[INDEX_PTR].r8_ptr)
 	{
 		registers[PROGRAM_COUNTER].r16++;
 		switch (*registers[INDEX_PTR].r8_ptr)
@@ -203,7 +203,7 @@ void cpu_process(int32_t cycles, eeprom* rom)
 		case CALL: CPU_CALL(rom); break;
 		case JMP: CPU_JMP(rom); break;
 		case RET: CPU_RET(rom); break;
-		case PRINTF: CPU_PRINTF(); break;
+		case COUT: CPU_COUT(); break;
 		}
 	}
 }

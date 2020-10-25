@@ -69,7 +69,7 @@ void set_stack();
 void extend_stack(uint16_t ext);
 void reset_cpu();
 void free_cpu();
-void cpu_process(int32_t cycles, eeprom* rom);
+void cpu_process(eeprom* rom);
 void stack_write(uint16_t address, uint8_t val);
 uint8_t stack_read(uint16_t address);
 

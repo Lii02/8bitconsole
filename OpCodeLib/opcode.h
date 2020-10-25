@@ -19,6 +19,7 @@
 #define INT_DISABLE_FLAG 0b10000000
 #define ZERO_FLAG 0b01000000
 #define DECIMAL_FLAG 0b00100000
+#define NEGATIVE_FLAG 0b00010000
 // Static flag(last bit) is always 1
 #define STATIC_FLAG 0b00000001
 
@@ -50,10 +51,10 @@
 #define JMP 0xEC
 #define CALL 0xED
 #define RET 0xEE
-#define PRINTF 0xEF
+#define COUT 0xEF
 
-#define INTERNAL_RAM 0x800
-#define VRAM 0x2800
+#define INTERNAL_RAM 0x900
+#define VRAM 0xFFFF
 
 typedef struct
 {

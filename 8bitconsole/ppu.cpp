@@ -28,6 +28,14 @@ uint8_t ppu_read(uint16_t address)
 	return vram[address];
 }
 
+v2 create_v2(float x, float y)
+{
+	v2 v;
+	v.x = x;
+	v.y = y;
+	return v;
+}
+
 void initialize_ppu()
 {
 	vram = (stack_t)li_malloc(VRAM);
@@ -39,37 +47,67 @@ void free_ppu()
 	li_free(vram);
 }
 
-render_buffer* create_render_buffer(int32_t width, int32_t height, int8_t bpp)
+void ppu_render()
 {
-	render_buffer* buffer = (render_buffer*)li_malloc(sizeof(render_buffer));
-	int32_t s = width * height * bpp;
-	buffer->buffer = (uint8_t*)li_malloc(s);
-	memset(buffer->buffer, 0, s);
-	buffer->width = width;
-	buffer->height = height;
-	buffer->bpp = bpp;
-	return buffer;
+	draw_buffer(PPUBUFFID);
+}
+
+render_buffer* create_render_buffer(int32_t width, int32_t height)
+{
+	render_buffer* buff = (render_buffer*)li_malloc(sizeof(render_buffer));
+	buff->bpp = 3;
+	int32_t s = width * height * buff->bpp;
+	buff->buffer = (uint8_t*)li_malloc(s);
+	memset(buff->buffer, 0, s);
+	buff->width = width;
+	buff->height = height;
+	glGenTextures(1, &buff->id);
+	update_render_buffer(buff);
+	return buff;
 }
 
 void free_render_buffer(render_buffer* b)
 {
+	glDeleteTextures(1, &b->id);
 	li_free(b->buffer);
 	li_free(b);
+}
+
+void update_render_buffer(render_buffer* buff)
+{
+	glBindTexture(GL_TEXTURE_2D, buff->id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, buff->width, buff->height, 0, GL_RGB, GL_UNSIGNED_BYTE, buff->buffer);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void put_pixel(render_buffer* buff, int32_t x, int32_t y, ppu_color color)
 {
 	if (0 <= x && x < buff->width && 0 <= y && y < buff->height)
 	{
-		ppu_rgb_color col = hex_to_float_rgb(color);
-		int32_t position = (x + y * buff->width) * buff->bpp;
-		buff->buffer[position] = (uint8_t)col.r;
-		buff->buffer[position + 1] = (uint8_t)col.g;
-		buff->buffer[position + 2] = (uint8_t)col.b;
+		int32_t position = ((x + y * buff->width) * buff->bpp);
+		ppu_rgb_color c = hex_to_float_rgb(color);
+		buff->buffer[position] = c.r;
+		buff->buffer[position + 1] = c.g;
+		buff->buffer[position + 2] = c.b;
 	}
 }
 
-void draw_buffer(render_buffer* buff)
+void draw_buffer(uint32_t id)
 {
-	glDrawPixels(buff->width, buff->height, GL_RGB, GL_UNSIGNED_BYTE, buff->buffer);
+	glBindTexture(GL_TEXTURE_2D, id);
+
+	glBegin(GL_QUADS);
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(-1.0f, -1.0f, 0.0f);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(-1.0f, 1.0f, 0.0f);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(1.0f, 1.0f, 0.0f);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(1.0f, -1.0f, 0.0f);
+	glEnd();
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 }

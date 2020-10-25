@@ -3,7 +3,7 @@
 opcode codes[] =
 {
 	{"nop", NOP, 0}, {"halt", HALT, 0}, {"int", INT_OP, 0}, {"jmp", JMP, 1}, {"call", CALL, 1}, {"ret", RET, 0},
-	{"printf", PRINTF, 1},
+	{"cout", COUT, 1},
 	// Status flag operations
 	{"seti", SETI, 1}, {"setd", SETD, 1},
 	// Register manipulation operation

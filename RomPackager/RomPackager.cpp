@@ -39,6 +39,10 @@ void free_input_file(input_file* file)
 	free(file);
 }
 
+#define swap_4_bytes(val) \
+((((val) >> 24) & 0x000000FF) | (((val) >> 8) & 0x0000FF00) | \
+	(((val) << 8) & 0x00FF0000) | (((val) << 24) & 0xFF000000))
+
 int main(int argc, char** argv)
 {
 	if (argc < 4)
@@ -64,19 +68,18 @@ int main(int argc, char** argv)
 	char* output_filep = argv[3];
 
 	FILE* write_ptr = fopen(output_filep, "wb");
-	int32_t sig = 0x656B756C;
+	int32_t sig = swap_4_bytes(ROM_SIGNATURE);
 	WRITE_TO_PTR((Byte*)&sig, 4);
 
 	WRITE_TO_PTR((Byte*)&bytefile->length, 4);
-	int32_t test_chr_length = 0;
-	WRITE_TO_PTR((Byte*)&test_chr_length, 4);
+	WRITE_TO_PTR((Byte*)&chr_file->length, 4);
 	int16_t ram_ext = 0;
 	WRITE_TO_PTR((Byte*)&ram_ext, 2);
 	int16_t entry_point = 0;
 	WRITE_TO_PTR((Byte*)&entry_point, 2);
 
 	WRITE_TO_PTR(bytefile->bytes, bytefile->length);
-	//WRITE_TO_PTR(chr_file->bytes, chr_file->length);
+	WRITE_TO_PTR(chr_file->bytes, chr_file->length);
 
 	printf("Wrote %d bytes into %s", ftell(write_ptr), output_filep);
 	free_input_file(bytefile);
