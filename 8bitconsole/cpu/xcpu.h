@@ -28,9 +28,9 @@
 #define POP_SHORT() ((uint16_t)(*((uint16_t *)(registers[STACK_PTR].r8_ptr -= 2))))
 #define POP_INT() ((uint32_t)(*((uint32_t *)(registers[STACK_PTR].r8_ptr -= 4))))
 
-#define EEPROM_GET_BYTE() ((uint8_t)*(registers[INDEX_PTR].r8_ptr++))
-#define EEPROM_GET_SHORT() ((uint16_t) (*((uint16_t*) (registers[INDEX_PTR].r8_ptr++))))
-#define EEPROM_GET_INT() ((uint32_t) (*((uint32_t*) (registers[INDEX_PTR].r8_ptr++))))
+#define EEPROM_GET_BYTE() ((uint8_t)*(registers[INDEX_PTR].r8_ptr))
+#define EEPROM_GET_SHORT() ((uint16_t) (*((uint16_t*) (registers[INDEX_PTR].r8_ptr))))
+#define EEPROM_GET_INT() ((uint32_t) (*((uint32_t*) (registers[INDEX_PTR].r8_ptr))))
 #define INCREASE_IP(x) for(int i = 0; i < x; i++) { *(registers[INDEX_PTR].r8_ptr)++; }
 
 #define SET_INDEX_AFTER_HEADER(rom, i) registers[INDEX_PTR].r8_ptr = *(rom->input_bytes) + (sizeof(rom_header) + i);
@@ -72,5 +72,7 @@ void free_cpu();
 void cpu_process(eeprom* rom);
 void stack_write(uint16_t address, uint8_t val);
 uint8_t stack_read(uint16_t address);
+uint8_t get_byte(uint16_t addr);
+void write_byte(uint16_t addr, uint8_t b);
 
 #endif

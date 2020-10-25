@@ -16,12 +16,12 @@
 #define MEMORY_MODE_REGISTER 0x7
 
 // Flag register values
-#define INT_DISABLE_FLAG 0b10000000
-#define ZERO_FLAG 0b01000000
-#define DECIMAL_FLAG 0b00100000
-#define NEGATIVE_FLAG 0b00010000
-// Static flag(last bit) is always 1
-#define STATIC_FLAG 0b00000001
+#define INT_DISABLE_FLAG (1 << 0)
+#define ZERO_FLAG (1 << 1)
+#define DECIMAL_FLAG (1 << 2)
+#define NEGATIVE_FLAG (1 << 3)
+// Static flag(first bit) is always 1
+#define STATIC_FLAG (1 << 8)
 
 // Status flag operations
 #define SETI 0xA0
@@ -55,6 +55,17 @@
 
 #define INTERNAL_RAM 0x900
 #define VRAM 0xFFFF
+
+// Input
+#define INPUT_ADDR 0x0010
+#define A_BUTTON_FLAG (1 << 0)
+#define B_BUTTON_FLAG (1 << 1)
+#define START_BUTTON_FLAG (1 << 2)
+#define SELECT_BUTTON_FLAG (1 << 3)
+#define UP_BUTTON_FLAG (1 << 4)
+#define DOWN_BUTTON_FLAG (1 << 5)
+#define LEFT_BUTTON_FLAG (1 << 6)
+#define RIGHT_BUTTON_FLAG (1 << 7)
 
 typedef struct
 {

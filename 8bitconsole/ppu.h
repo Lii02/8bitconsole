@@ -6,16 +6,10 @@
 #define CONSOLE_RESY 512
 
 #define PPUCTRL vram[0x0]
-#define PPUSCROLL vram[0x1]
-#define PPUMASK vram[0x2]
-#define PPUBUFFID vram[0x3]
-
-typedef struct
-{
-	float x;
-	float y;
-} v2;
-v2 create_v2(float x, float y);
+#define PPUSCROLLX vram[0x1]
+#define PPUSCROLLY vram[0x2]
+#define PPUMASK vram[0x3]
+#define PPUBUFFID vram[0x4]
 
 typedef struct
 {

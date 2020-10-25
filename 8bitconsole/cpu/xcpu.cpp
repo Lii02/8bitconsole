@@ -62,10 +62,37 @@ uint8_t stack_read(uint16_t address)
 	return stack[address];
 }
 
+uint8_t get_byte(uint16_t addr)
+{
+	uint8_t b = 0;
+	if (addr > (INTERNAL_RAM - 1) && addr < (VRAM - 1))
+	{
+		b = ppu_read(addr - INTERNAL_RAM);
+	}
+	else
+	{
+		b = stack_read(addr);
+	}
+	return b;
+}
+
+void write_byte(uint16_t addr, uint8_t b)
+{
+	if (addr > (INTERNAL_RAM - 1) && addr < (VRAM - 1))
+	{
+		ppu_write(addr - INTERNAL_RAM, b);
+	}
+	else
+	{
+		stack_write(addr, b);
+	}
+}
+
 void CPU_SETI()
 {
 	INCREASE_IP(1);
 	int8_t flag = EEPROM_GET_BYTE();
+	INCREASE_IP(1);
 	if (flag == 0x1)
 	{
 		registers[STATUS_FLAG_REGISTER].r8 |= INT_DISABLE_FLAG;
@@ -76,6 +103,7 @@ void CPU_SETD()
 {
 	INCREASE_IP(1);
 	int8_t flag = EEPROM_GET_BYTE();
+	INCREASE_IP(1);
 	if (flag == 0x1)
 	{
 		registers[STATUS_FLAG_REGISTER].r8 |= DECIMAL_FLAG;
@@ -86,6 +114,7 @@ void CPU_LD_REG_IM(int8_t id)
 {
 	INCREASE_IP(1);
 	int8_t b = EEPROM_GET_BYTE();
+	INCREASE_IP(1);
 	registers[id].r8 = b;
 }
 
@@ -93,6 +122,7 @@ void CPU_LD_REG_REG(int8_t id)
 {
 	INCREASE_IP(1);
 	uint8_t val = get_8bit_register(EEPROM_GET_BYTE());
+	INCREASE_IP(1);
 	registers[id].r8 = val;
 }
 
@@ -100,20 +130,15 @@ void CPU_ST_STACK(uint8_t id)
 {
 	INCREASE_IP(1);
 	uint16_t addr = swap_2_bytes(EEPROM_GET_SHORT());
-	if (addr > (INTERNAL_RAM - 1) && addr < (VRAM - 1))
-	{
-		ppu_write(addr - INTERNAL_RAM, registers[id].r8);
-	}
-	else
-	{
-		stack_write(addr, registers[id].r8);
-	}
+	INCREASE_IP(2);
+	write_byte(addr, registers[id].r8);
 }
 
 void CPU_ADD_ACCUMULATOR()
 {
 	INCREASE_IP(1);
 	uint8_t b = EEPROM_GET_BYTE();
+	INCREASE_IP(1);
 	registers[ACCUMULATOR_REGISTER].r8 += b;
 }
 
@@ -128,6 +153,7 @@ void CPU_MUL_ACCUMULATOR()
 {
 	INCREASE_IP(1);
 	uint8_t b = EEPROM_GET_BYTE();
+	INCREASE_IP(1);
 	registers[ACCUMULATOR_REGISTER].r8 *= b;
 }
 
@@ -135,6 +161,7 @@ void CPU_DIV_ACCUMULATOR()
 {
 	INCREASE_IP(1);
 	uint8_t b = EEPROM_GET_BYTE();
+	INCREASE_IP(1);
 	registers[ACCUMULATOR_REGISTER].r8 /= b;
 }
 
@@ -143,6 +170,7 @@ void CPU_CALL(eeprom* rom)
 	INCREASE_IP(1);
 	uint16_t addr = swap_2_bytes(EEPROM_GET_SHORT());
 	PUSH_SHORT(*registers[INDEX_PTR].r16_ptr);
+	INCREASE_IP(2);
 	SET_INDEX_AFTER_HEADER(rom, addr);
 }
 
@@ -150,6 +178,7 @@ void CPU_JMP(eeprom* rom)
 {
 	INCREASE_IP(1);
 	uint16_t addr = swap_2_bytes(EEPROM_GET_SHORT());
+	INCREASE_IP(2);
 	SET_INDEX_AFTER_HEADER(rom, addr);
 }
 
@@ -164,16 +193,8 @@ void CPU_COUT()
 {
 	INCREASE_IP(1);
 	uint16_t addr = swap_2_bytes(EEPROM_GET_SHORT());
-	uint8_t b = 0;
-	if (addr > (INTERNAL_RAM - 1) && addr < (VRAM - 1))
-	{
-		b = ppu_read(addr - INTERNAL_RAM);
-	}
-	else
-	{
-		b = stack_read(addr);
-	}
-	putchar(b);
+	INCREASE_IP(2);
+	putchar(get_byte(addr));
 }
 
 void cpu_process(eeprom* rom)

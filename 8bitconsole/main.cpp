@@ -11,6 +11,7 @@
 #include "glfw/emulator_window.h"
 #include "ppu.h"
 #include "ic.h"
+#include "input.h"
 
 #pragma comment(lib, "opengl32.lib")
 #pragma comment(lib, "glfw3.lib")
@@ -50,9 +51,6 @@ int main(int argc, char** argv)
 	render_buffer* main_buffer = create_render_buffer(CONSOLE_RESX, CONSOLE_RESY);
 	
 	MemoryEditor ram_editor, rom_editor, vram_editor;
-	rom_editor.ReadOnly = true;
-	char* status_buffer = (char*)li_malloc(8);
-	memset(status_buffer, 0, 8);
 	
 	PPUBUFFID = main_buffer->id;
 
@@ -64,6 +62,8 @@ int main(int argc, char** argv)
 		}
 	}
 	update_render_buffer(main_buffer);
+
+	inputmap_t inputmap = default_input_map();
 
 	while (window_running(window))
 	{
@@ -79,13 +79,14 @@ int main(int argc, char** argv)
 		ImGui::Text("PC: $%x", registers[PROGRAM_COUNTER].r8);
 		ImGui::Text("IP: $%x", *(registers[INDEX_PTR].r8_ptr));
 		ImGui::Text("SP: $%x", *(registers[STACK_PTR].r8_ptr));
-		itoa(registers[STATUS_FLAG_REGISTER].r8, status_buffer, 2);
-		ImGui::Text("S: %s", status_buffer);
+		ImGui::Text("S: %x", registers[STATUS_FLAG_REGISTER].r8);
+		ImGui::Text("Input flag: %x", get_byte(INPUT_ADDR));
 		ImGui::End();
 
 		ppu_render();
 		cpu_process(rom);
 		
+		update_input(window, &inputmap);
 		update_window(window);
 	}
 

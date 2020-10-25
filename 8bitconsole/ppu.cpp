@@ -28,14 +28,6 @@ uint8_t ppu_read(uint16_t address)
 	return vram[address];
 }
 
-v2 create_v2(float x, float y)
-{
-	v2 v;
-	v.x = x;
-	v.y = y;
-	return v;
-}
-
 void initialize_ppu()
 {
 	vram = (stack_t)li_malloc(VRAM);

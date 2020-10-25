@@ -15,19 +15,24 @@ eeprom* load_eeprom(input_file* input)
 	memset(rom, 0, sizeof(eeprom));
 	registers[INDEX_PTR].r8_ptr = input->bytes;
 	rom->header.signature = swap_4_bytes(EEPROM_GET_INT());
+	INCREASE_IP(4);
 	if (rom->header.signature != ROM_SIGNATURE)
 	{
 		printf("EEPROM header signature is incorrect.\n");
 	}
 	rom->header.prgm_size = EEPROM_GET_INT();
 	rom->prgm = (uint8_t*)li_malloc(rom->header.prgm_size);
+	INCREASE_IP(4);
 
 	rom->header.chr_size = EEPROM_GET_INT();
 	rom->chr = (uint8_t*)li_malloc(rom->header.chr_size);
-	
+	INCREASE_IP(4);
+
 	rom->header.ram_ext = EEPROM_GET_SHORT();
+	INCREASE_IP(2);
 	rom->header.entry_point = EEPROM_GET_SHORT();
-	
+	INCREASE_IP(2);
+
 	unsigned int i;
 	for (i = 0; i < rom->header.prgm_size; i++)
 	{
