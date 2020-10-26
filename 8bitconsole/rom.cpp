@@ -20,17 +20,17 @@ eeprom* load_eeprom(input_file* input)
 	{
 		printf("EEPROM header signature is incorrect.\n");
 	}
-	rom->header.prgm_size = EEPROM_GET_INT();
+	rom->header.prgm_size = swap_4_bytes(EEPROM_GET_INT());
 	rom->prgm = (uint8_t*)li_malloc(rom->header.prgm_size);
 	INCREASE_IP(4);
 
-	rom->header.chr_size = EEPROM_GET_INT();
+	rom->header.chr_size = swap_4_bytes(EEPROM_GET_INT());
 	rom->chr = (uint8_t*)li_malloc(rom->header.chr_size);
 	INCREASE_IP(4);
 
-	rom->header.ram_ext = EEPROM_GET_SHORT();
+	rom->header.ram_ext = swap_2_bytes(EEPROM_GET_SHORT());
 	INCREASE_IP(2);
-	rom->header.entry_point = EEPROM_GET_SHORT();
+	rom->header.entry_point = swap_2_bytes(EEPROM_GET_SHORT());
 	INCREASE_IP(2);
 
 	unsigned int i;

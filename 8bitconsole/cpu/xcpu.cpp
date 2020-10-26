@@ -22,15 +22,15 @@ void initialize_cpu()
 void set_stack()
 {
 	stack = (stack_t)li_malloc(INTERNAL_RAM);
-	registers[STACK_PTR].r8_ptr = stack;
 	memset(stack, 0, INTERNAL_RAM);
+	registers[STACK_PTR].r8_ptr = stack;
 }
 
 void extend_stack(uint16_t ext)
 {
 	stack = (stack_t)li_realloc(stack, INTERNAL_RAM + ext);
-	registers[STACK_PTR].r8_ptr = stack;
 	memset(stack, 0, INTERNAL_RAM + ext);
+	registers[STACK_PTR].r8_ptr = stack;
 }
 
 void reset_cpu()
@@ -90,7 +90,7 @@ void write_byte(uint16_t addr, uint8_t b)
 
 void CPU_SETI()
 {
-	INCREASE_IP(1);
+	INCREASE_IP_AND_PC();
 	int8_t flag = EEPROM_GET_BYTE();
 	INCREASE_IP(1);
 	if (flag == 0x1)
@@ -101,7 +101,7 @@ void CPU_SETI()
 
 void CPU_SETD()
 {
-	INCREASE_IP(1);
+	INCREASE_IP_AND_PC();
 	int8_t flag = EEPROM_GET_BYTE();
 	INCREASE_IP(1);
 	if (flag == 0x1)
@@ -112,7 +112,7 @@ void CPU_SETD()
 
 void CPU_LD_REG_IM(int8_t id)
 {
-	INCREASE_IP(1);
+	INCREASE_IP_AND_PC();
 	int8_t b = EEPROM_GET_BYTE();
 	INCREASE_IP(1);
 	registers[id].r8 = b;
@@ -120,7 +120,7 @@ void CPU_LD_REG_IM(int8_t id)
 
 void CPU_LD_REG_REG(int8_t id)
 {
-	INCREASE_IP(1);
+	INCREASE_IP_AND_PC();
 	uint8_t val = get_8bit_register(EEPROM_GET_BYTE());
 	INCREASE_IP(1);
 	registers[id].r8 = val;
@@ -128,7 +128,7 @@ void CPU_LD_REG_REG(int8_t id)
 
 void CPU_ST_STACK(uint8_t id)
 {
-	INCREASE_IP(1);
+	INCREASE_IP_AND_PC();
 	uint16_t addr = swap_2_bytes(EEPROM_GET_SHORT());
 	INCREASE_IP(2);
 	write_byte(addr, registers[id].r8);
@@ -136,7 +136,7 @@ void CPU_ST_STACK(uint8_t id)
 
 void CPU_ADD_ACCUMULATOR()
 {
-	INCREASE_IP(1);
+	INCREASE_IP_AND_PC();
 	uint8_t b = EEPROM_GET_BYTE();
 	INCREASE_IP(1);
 	registers[ACCUMULATOR_REGISTER].r8 += b;
@@ -144,14 +144,14 @@ void CPU_ADD_ACCUMULATOR()
 
 void CPU_SUB_ACCUMULATOR()
 {
-	INCREASE_IP(1);
+	INCREASE_IP_AND_PC();
 	uint8_t b = EEPROM_GET_BYTE();
 	registers[ACCUMULATOR_REGISTER].r8 -= b;
 }
 
 void CPU_MUL_ACCUMULATOR()
 {
-	INCREASE_IP(1);
+	INCREASE_IP_AND_PC();
 	uint8_t b = EEPROM_GET_BYTE();
 	INCREASE_IP(1);
 	registers[ACCUMULATOR_REGISTER].r8 *= b;
@@ -159,7 +159,7 @@ void CPU_MUL_ACCUMULATOR()
 
 void CPU_DIV_ACCUMULATOR()
 {
-	INCREASE_IP(1);
+	INCREASE_IP_AND_PC();
 	uint8_t b = EEPROM_GET_BYTE();
 	INCREASE_IP(1);
 	registers[ACCUMULATOR_REGISTER].r8 /= b;
@@ -167,16 +167,17 @@ void CPU_DIV_ACCUMULATOR()
 
 void CPU_CALL(eeprom* rom)
 {
-	INCREASE_IP(1);
+	INCREASE_IP_AND_PC();
 	uint16_t addr = swap_2_bytes(EEPROM_GET_SHORT());
-	PUSH_SHORT(*registers[INDEX_PTR].r16_ptr);
+	uint16_t current_addr = swap_2_bytes(*registers[INDEX_PTR].r16_ptr) - 1;
+	PUSH_SHORT(current_addr);
 	INCREASE_IP(2);
 	SET_INDEX_AFTER_HEADER(rom, addr);
 }
 
 void CPU_JMP(eeprom* rom)
 {
-	INCREASE_IP(1);
+	INCREASE_IP_AND_PC();
 	uint16_t addr = swap_2_bytes(EEPROM_GET_SHORT());
 	INCREASE_IP(2);
 	SET_INDEX_AFTER_HEADER(rom, addr);
@@ -184,24 +185,56 @@ void CPU_JMP(eeprom* rom)
 
 void CPU_RET(eeprom* rom)
 {
-	INCREASE_IP(1);
+	INCREASE_IP_AND_PC();
 	uint16_t addr = POP_SHORT();
 	SET_INDEX_AFTER_HEADER(rom, addr);
 }
 
 void CPU_COUT()
 {
-	INCREASE_IP(1);
+	INCREASE_IP_AND_PC();
 	uint16_t addr = swap_2_bytes(EEPROM_GET_SHORT());
 	INCREASE_IP(2);
 	putchar(get_byte(addr));
+}
+
+void CPU_CMP_IM(int8_t id)
+{
+	INCREASE_IP_AND_PC();
+	int8_t b = EEPROM_GET_BYTE();
+	INCREASE_IP(1);
+	bool eq = (registers[id].r8 == b);
+	if (eq)
+		registers[STATUS_FLAG_REGISTER].r8 |= CMP_FLAG;
+}
+
+void CPU_CMP_MEM(int8_t id)
+{
+	INCREASE_IP_AND_PC();
+	int16_t b = get_byte(swap_2_bytes(EEPROM_GET_SHORT()));
+	INCREASE_IP(2);
+	bool eq = (registers[id].r8 == b);
+	if (eq)
+		registers[STATUS_FLAG_REGISTER].r8 |= CMP_FLAG;
+}
+
+void CPU_BEQ(eeprom* rom)
+{
+	INCREASE_IP_AND_PC();
+	if (registers[STATUS_FLAG_REGISTER].r8 & CMP_FLAG)
+	{
+		uint16_t addr = swap_2_bytes(EEPROM_GET_SHORT());
+		uint16_t current_addr = swap_2_bytes(*registers[INDEX_PTR].r16_ptr) - 1;
+		PUSH_SHORT(current_addr);
+		INCREASE_IP(2);
+		SET_INDEX_AFTER_HEADER(rom, addr);
+	}
 }
 
 void cpu_process(eeprom* rom)
 {
 	while (registers[INDEX_PTR].r8_ptr)
 	{
-		registers[PROGRAM_COUNTER].r16++;
 		switch (*registers[INDEX_PTR].r8_ptr)
 		{
 		case NOP: INCREASE_IP(1); break;
@@ -225,6 +258,13 @@ void cpu_process(eeprom* rom)
 		case JMP: CPU_JMP(rom); break;
 		case RET: CPU_RET(rom); break;
 		case COUT: CPU_COUT(); break;
+		case CMPA_IM: CPU_CMP_IM(ACCUMULATOR_REGISTER); break;
+		case CMPX_IM: CPU_CMP_IM(INDEXX_REGISTER); break;
+		case CMPY_IM: CPU_CMP_IM(INDEXY_REGISTER); break;
+		case CMPA_MEM: CPU_CMP_MEM(ACCUMULATOR_REGISTER); break;
+		case CMPX_MEM: CPU_CMP_MEM(INDEXX_REGISTER); break;
+		case CMPY_MEM: CPU_CMP_MEM(INDEXY_REGISTER); break;
+		case BEQ: CPU_BEQ(rom); break;
 		}
 	}
 }

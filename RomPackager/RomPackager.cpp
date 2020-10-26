@@ -39,6 +39,9 @@ void free_input_file(input_file* file)
 	free(file);
 }
 
+#define swap_2_bytes(val) \
+((((val) >> 8) & 0x00FF) | (((val) << 8) & 0xFF00))
+
 #define swap_4_bytes(val) \
 ((((val) >> 24) & 0x000000FF) | (((val) >> 8) & 0x0000FF00) | \
 	(((val) << 8) & 0x00FF0000) | (((val) << 24) & 0xFF000000))
@@ -71,11 +74,13 @@ int main(int argc, char** argv)
 	int32_t sig = swap_4_bytes(ROM_SIGNATURE);
 	WRITE_TO_PTR((Byte*)&sig, 4);
 
-	WRITE_TO_PTR((Byte*)&bytefile->length, 4);
-	WRITE_TO_PTR((Byte*)&chr_file->length, 4);
-	int16_t ram_ext = 0;
+	uint32_t new_bytefile_length = swap_4_bytes(bytefile->length);
+	WRITE_TO_PTR((Byte*)&new_bytefile_length, 4);
+	uint32_t new_chr_length = swap_4_bytes(chr_file->length);
+	WRITE_TO_PTR((Byte*)&new_chr_length, 4);
+	int16_t ram_ext = swap_2_bytes(0);
 	WRITE_TO_PTR((Byte*)&ram_ext, 2);
-	int16_t entry_point = 0;
+	int16_t entry_point = swap_2_bytes(0);
 	WRITE_TO_PTR((Byte*)&entry_point, 2);
 
 	WRITE_TO_PTR(bytefile->bytes, bytefile->length);

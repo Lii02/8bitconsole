@@ -16,12 +16,12 @@
 #define MEMORY_MODE_REGISTER 0x7
 
 // Flag register values
-#define INT_DISABLE_FLAG (1 << 0)
-#define ZERO_FLAG (1 << 1)
-#define DECIMAL_FLAG (1 << 2)
-#define NEGATIVE_FLAG (1 << 3)
-// Static flag(first bit) is always 1
-#define STATIC_FLAG (1 << 8)
+#define INT_DISABLE_FLAG (1 << 8)
+#define CMP_FLAG (1 << 7)
+#define DECIMAL_FLAG (1 << 6)
+#define NEGATIVE_FLAG (1 << 5)
+// Static flag(last bit) is always 1
+#define STATIC_FLAG (1 << 0)
 
 // Status flag operations
 #define SETI 0xA0
@@ -44,6 +44,17 @@
 #define STX 0xC1
 #define STY 0xC2
 
+// Compare operations
+#define CMPA_IM 0x20
+#define CMPX_IM 0x21
+#define CMPY_IM 0x22
+#define CMPA_MEM 0x23
+#define CMPX_MEM 0x24
+#define CMPY_MEM 0x25
+
+// Branch operations
+#define BEQ 0x30
+
 // General opcodes
 #define NOP 0xEA
 #define HALT 0xCC
@@ -55,6 +66,7 @@
 
 #define INTERNAL_RAM 0x900
 #define VRAM 0xFFFF
+#define VRAM_FIRST (INTERNAL_RAM + rom->header.ram_ext)
 
 // Input
 #define INPUT_ADDR 0x0010
@@ -66,6 +78,8 @@
 #define DOWN_BUTTON_FLAG (1 << 5)
 #define LEFT_BUTTON_FLAG (1 << 6)
 #define RIGHT_BUTTON_FLAG (1 << 7)
+
+#define RUNNING_ADDR 0x0011
 
 typedef struct
 {

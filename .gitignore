@@ -1,4 +1,7 @@
 x64/
 Intermediates/
 .vs/
-test.*
+test.rom
+test.byte
+test.chr
+test.png

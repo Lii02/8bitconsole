@@ -10,6 +10,7 @@
 #define PPUSCROLLY vram[0x2]
 #define PPUMASK vram[0x3]
 #define PPUBUFFID vram[0x4]
+#define PPUCHRLEN vram[0x5]
 
 typedef struct
 {

@@ -65,9 +65,17 @@ int main(int argc, char** argv)
 
 	inputmap_t inputmap = default_input_map();
 
+	for (unsigned int i = 0x5; i < 0x9; i++)
+	{
+		int8_t new_index = (i - sizeof(int));
+		uint8_t b = (rom->header.chr_size << (8 * new_index));
+		write_byte(VRAM_FIRST + 0x4 + new_index, b);
+	}
+
 	while (window_running(window))
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
+		write_byte(RUNNING_ADDR, !glfwWindowShouldClose(window->ptr));
 
 		ram_editor.DrawWindow("RAM", stack, INTERNAL_RAM + rom->header.ram_ext);
 		vram_editor.DrawWindow("VRAM", vram, VRAM);
