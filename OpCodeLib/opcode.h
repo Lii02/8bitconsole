@@ -16,8 +16,11 @@
 #define MEMORY_MODE_REGISTER 0x7
 
 // Flag register values
-#define INT_DISABLE_FLAG (1 << 8)
-#define CMP_FLAG (1 << 7)
+#define GE_FLAG (1 << 11)
+#define LE_FLAG (1 << 10)
+#define NE_FLAG (1 << 9)
+#define EQ_FLAG (1 << 8)
+#define INT_DISABLE_FLAG (1 << 7)
 #define DECIMAL_FLAG (1 << 6)
 #define NEGATIVE_FLAG (1 << 5)
 // Static flag(last bit) is always 1
@@ -54,6 +57,9 @@
 
 // Branch operations
 #define BEQ 0x30
+#define BNE 0x31
+#define BLE 0x32
+#define BGE 0x33
 
 // General opcodes
 #define NOP 0xEA

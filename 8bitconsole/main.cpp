@@ -67,7 +67,7 @@ int main(int argc, char** argv)
 
 	for (unsigned int i = 0x5; i < 0x9; i++)
 	{
-		int8_t new_index = (i - sizeof(int));
+		int8_t new_index = (i - sizeof(unsigned int));
 		uint8_t b = (rom->header.chr_size << (8 * new_index));
 		write_byte(VRAM_FIRST + 0x4 + new_index, b);
 	}

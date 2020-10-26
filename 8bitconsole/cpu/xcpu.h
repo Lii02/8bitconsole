@@ -33,8 +33,8 @@
 #define EEPROM_GET_INT() ((uint32_t) (*((uint32_t*) (registers[INDEX_PTR].r8_ptr))))
 #define INCREASE_IP(x) for(int i = 0; i < x; i++) { *(registers[INDEX_PTR].r8_ptr)++; }
 
+#define GET_CURRENT_ADDR(rom) ((uint16_t)registers[INDEX_PTR].r16_ptr + 3 - (uint16_t)rom->prgm) - 1
 #define SET_INDEX_AFTER_HEADER(rom, i) registers[INDEX_PTR].r8_ptr = rom->prgm + i;
-
 #define INCREASE_IP_AND_PC() INCREASE_IP(1); registers[PROGRAM_COUNTER].r16++;
 
 typedef uint8_t* stack_t;

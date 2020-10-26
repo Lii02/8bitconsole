@@ -16,7 +16,7 @@ opcode codes[] =
 	// Compare operations
 	{"cmpa", CMPA_IM, 1}, {"cmpx", CMPX_IM, 1}, {"cmpy", CMPY_IM, 1}, {"cmpa", CMPA_MEM, 1}, {"cmpx", CMPX_MEM, 1}, {"cmpy", CMPY_MEM, 1},
 	// Branch operations
-	{"beq", BEQ, 1},
+	{"beq", BEQ, 1}, {"bne", BNE, 1}, {"ble", BLE, 1}, {"bge", BGE, 1},
 };
 
 opcode get_opcode(uint8_t op)

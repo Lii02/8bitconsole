@@ -16,7 +16,8 @@ void initialize_cpu()
 	{
 		registers[i].id = i;
 	}
-	registers[STATUS_FLAG_REGISTER].r8 |= STATIC_FLAG;
+	registers[STATUS_FLAG_REGISTER].r16 |= STATIC_FLAG;
+	registers[PROGRAM_COUNTER].r16 = 0x0;
 }
 
 void set_stack()
@@ -168,9 +169,9 @@ void CPU_DIV_ACCUMULATOR()
 void CPU_CALL(eeprom* rom)
 {
 	INCREASE_IP_AND_PC();
-	uint16_t addr = swap_2_bytes(EEPROM_GET_SHORT());
-	uint16_t current_addr = swap_2_bytes(*registers[INDEX_PTR].r16_ptr) - 1;
+	uint16_t current_addr = GET_CURRENT_ADDR(rom);
 	PUSH_SHORT(current_addr);
+	uint16_t addr = swap_2_bytes(EEPROM_GET_SHORT());
 	INCREASE_IP(2);
 	SET_INDEX_AFTER_HEADER(rom, addr);
 }
@@ -198,38 +199,86 @@ void CPU_COUT()
 	putchar(get_byte(addr));
 }
 
+void CMP(int8_t id, uint8_t b)
+{
+	if (registers[id].r8 == b)
+		registers[STATUS_FLAG_REGISTER].r16 |= EQ_FLAG;
+	if (registers[id].r8 != b)
+		registers[STATUS_FLAG_REGISTER].r16 |= NE_FLAG;
+	else if (registers[id].r8 < b)
+		registers[STATUS_FLAG_REGISTER].r16 |= LE_FLAG;
+	if (registers[id].r8 > b)
+		registers[STATUS_FLAG_REGISTER].r16 |= GE_FLAG;
+}
+
 void CPU_CMP_IM(int8_t id)
 {
 	INCREASE_IP_AND_PC();
 	int8_t b = EEPROM_GET_BYTE();
 	INCREASE_IP(1);
-	bool eq = (registers[id].r8 == b);
-	if (eq)
-		registers[STATUS_FLAG_REGISTER].r8 |= CMP_FLAG;
+	CMP(id, b);
 }
 
 void CPU_CMP_MEM(int8_t id)
 {
 	INCREASE_IP_AND_PC();
-	int16_t b = get_byte(swap_2_bytes(EEPROM_GET_SHORT()));
+	int8_t b = get_byte(swap_2_bytes(EEPROM_GET_SHORT()));
 	INCREASE_IP(2);
-	bool eq = (registers[id].r8 == b);
-	if (eq)
-		registers[STATUS_FLAG_REGISTER].r8 |= CMP_FLAG;
+	CMP(id, b);
 }
 
 void CPU_BEQ(eeprom* rom)
 {
 	INCREASE_IP_AND_PC();
-	if (registers[STATUS_FLAG_REGISTER].r8 & CMP_FLAG)
+	uint16_t current_addr = GET_CURRENT_ADDR(rom);
+	uint16_t addr = swap_2_bytes(EEPROM_GET_SHORT());
+	INCREASE_IP(2);
+	if (registers[STATUS_FLAG_REGISTER].r16 & EQ_FLAG)
 	{
-		uint16_t addr = swap_2_bytes(EEPROM_GET_SHORT());
-		uint16_t current_addr = swap_2_bytes(*registers[INDEX_PTR].r16_ptr) - 1;
 		PUSH_SHORT(current_addr);
-		INCREASE_IP(2);
 		SET_INDEX_AFTER_HEADER(rom, addr);
 	}
 }
+
+void CPU_BNE(eeprom* rom)
+{
+	INCREASE_IP_AND_PC();
+	uint16_t current_addr = GET_CURRENT_ADDR(rom);
+	uint16_t addr = swap_2_bytes(EEPROM_GET_SHORT());
+	INCREASE_IP(2);
+	if (registers[STATUS_FLAG_REGISTER].r16 & NE_FLAG)
+	{
+		PUSH_SHORT(current_addr);
+		SET_INDEX_AFTER_HEADER(rom, addr);
+	}
+}
+
+void CPU_BLE(eeprom* rom)
+{
+	INCREASE_IP_AND_PC();
+	uint16_t current_addr = GET_CURRENT_ADDR(rom);
+	uint16_t addr = swap_2_bytes(EEPROM_GET_SHORT());
+	INCREASE_IP(2);
+	if (registers[STATUS_FLAG_REGISTER].r16 & LE_FLAG)
+	{
+		PUSH_SHORT(current_addr);
+		SET_INDEX_AFTER_HEADER(rom, addr);
+	}
+}
+
+void CPU_BGE(eeprom* rom)
+{
+	INCREASE_IP_AND_PC();
+	uint16_t current_addr = GET_CURRENT_ADDR(rom);
+	uint16_t addr = swap_2_bytes(EEPROM_GET_SHORT());
+	INCREASE_IP(2);
+	if (registers[STATUS_FLAG_REGISTER].r16 & GE_FLAG)
+	{
+		PUSH_SHORT(current_addr);
+		SET_INDEX_AFTER_HEADER(rom, addr);
+	}
+}
+
 
 void cpu_process(eeprom* rom)
 {
@@ -237,7 +286,7 @@ void cpu_process(eeprom* rom)
 	{
 		switch (*registers[INDEX_PTR].r8_ptr)
 		{
-		case NOP: INCREASE_IP(1); break;
+		case NOP: INCREASE_IP_AND_PC(); break;
 		case HALT: return; break;
 		case SETI: CPU_SETI(); break;
 		case SETD: CPU_SETD(); break;
@@ -265,6 +314,9 @@ void cpu_process(eeprom* rom)
 		case CMPX_MEM: CPU_CMP_MEM(INDEXX_REGISTER); break;
 		case CMPY_MEM: CPU_CMP_MEM(INDEXY_REGISTER); break;
 		case BEQ: CPU_BEQ(rom); break;
+		case BNE: CPU_BNE(rom); break;
+		case BLE: CPU_BLE(rom); break;
+		case BGE: CPU_BGE(rom); break;
 		}
 	}
 }
