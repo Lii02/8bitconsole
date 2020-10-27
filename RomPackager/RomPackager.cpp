@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <ctype.h>
 #include <opcode.h>
 
 typedef unsigned char Byte;
@@ -54,6 +55,21 @@ int main(int argc, char** argv)
 		exit(0);
 	}
 
+	bool ram_inc = false;
+	uint16_t ram_ext = 0;
+	for (unsigned int i = 4; i < argc; i++)
+	{
+		if ((strcmp(argv[i], "-ram") == 0) || (strcmp(argv[i], "-r") == 0))
+		{
+			ram_inc = true;
+		}
+
+		if (ram_inc && (isdigit(atoi(argv[i])) == 0))
+		{
+			ram_ext = atoi(argv[i]);
+		}
+	}
+
 	char* byte_filep = argv[1];
 	input_file* bytefile = read_file(byte_filep);
 	if (!bytefile)
@@ -78,7 +94,7 @@ int main(int argc, char** argv)
 	WRITE_TO_PTR((Byte*)&new_bytefile_length, 4);
 	uint32_t new_chr_length = swap_4_bytes(chr_file->length);
 	WRITE_TO_PTR((Byte*)&new_chr_length, 4);
-	int16_t ram_ext = swap_2_bytes(0);
+	ram_ext = swap_2_bytes(ram_ext);
 	WRITE_TO_PTR((Byte*)&ram_ext, 2);
 	int16_t entry_point = swap_2_bytes(0);
 	WRITE_TO_PTR((Byte*)&entry_point, 2);

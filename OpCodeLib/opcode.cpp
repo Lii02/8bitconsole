@@ -12,11 +12,13 @@ opcode codes[] =
 	{"ldy", LDY_IM, 1}, {"ldy", LDY_REG, 1},
 	{"adda", ADD_A, 1}, {"suba", SUB_A, 1}, {"mula", MUL_A, 1}, {"diva", DIV_A, 1},
 	// Stack manipulation operations
-	{"sta", STA, 1}, { "stx", STX, 1}, { "sty", STY, 1},
+	{"sta", STA, 1}, { "stx", STX, 1}, { "sty", STY, 1}, { "incsp", INCSP, 1}, { "decsp", DECSP, 1},
 	// Compare operations
 	{"cmpa", CMPA_IM, 1}, {"cmpx", CMPX_IM, 1}, {"cmpy", CMPY_IM, 1}, {"cmpa", CMPA_MEM, 1}, {"cmpx", CMPX_MEM, 1}, {"cmpy", CMPY_MEM, 1},
 	// Branch operations
 	{"beq", BEQ, 1}, {"bne", BNE, 1}, {"ble", BLE, 1}, {"bge", BGE, 1},
+	// Clear operations
+	{"clrcmp", CLRCMP, 0},
 };
 
 opcode get_opcode(uint8_t op)

@@ -44,7 +44,8 @@ int main(int argc, char** argv)
 	initialize_cpu();
 	set_stack();
 	eeprom* rom = load_eeprom(file);
-	extend_stack(rom->header.ram_ext);
+	//extend_stack(rom->header.ram_ext);
+	rom->header.ram_ext = 0;
 	initialize_ppu();
 	glEnable(GL_TEXTURE_2D);
 
@@ -54,22 +55,13 @@ int main(int argc, char** argv)
 	
 	PPUBUFFID = main_buffer->id;
 
-	for (int x = 0; x < 512; x++)
-	{
-		for (int y = 0; y < 512; y++)
-		{
-			put_pixel(main_buffer, x, y, rand() % 0xFF);
-		}
-	}
-	update_render_buffer(main_buffer);
-
 	inputmap_t inputmap = default_input_map();
 
 	for (unsigned int i = 0x5; i < 0x9; i++)
 	{
-		int8_t new_index = (i - sizeof(unsigned int));
-		uint8_t b = (rom->header.chr_size << (8 * new_index));
-		write_byte(VRAM_FIRST + 0x4 + new_index, b);
+		uint8_t b = (rom->header.chr_size << (8 * (i - sizeof(unsigned int))));
+		int16_t new_index = VRAM_FIRST + 0x4 + (i - sizeof(unsigned int));
+		write_byte(new_index, b);
 	}
 
 	while (window_running(window))
@@ -87,7 +79,7 @@ int main(int argc, char** argv)
 		ImGui::Text("PC: $%x", registers[PROGRAM_COUNTER].r8);
 		ImGui::Text("IP: $%x", *(registers[INDEX_PTR].r8_ptr));
 		ImGui::Text("SP: $%x", *(registers[STACK_PTR].r8_ptr));
-		ImGui::Text("S: %x", registers[STATUS_FLAG_REGISTER].r8);
+		ImGui::Text("S: %x", registers[STATUS_FLAG_REGISTER].r16);
 		ImGui::Text("Input flag: %x", get_byte(INPUT_ADDR));
 		ImGui::End();
 

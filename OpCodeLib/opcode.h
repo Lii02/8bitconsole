@@ -46,6 +46,8 @@
 #define STA 0xC0
 #define STX 0xC1
 #define STY 0xC2
+#define INCSP 0xC3
+#define DECSP 0xC4
 
 // Compare operations
 #define CMPA_IM 0x20
@@ -70,9 +72,13 @@
 #define RET 0xEE
 #define COUT 0xEF
 
+// Clear instructions
+#define CLRCMP 0xF0
+
 #define INTERNAL_RAM 0x900
 #define VRAM 0xFFFF
 #define VRAM_FIRST (INTERNAL_RAM + rom->header.ram_ext)
+
 
 // Input
 #define INPUT_ADDR 0x0010

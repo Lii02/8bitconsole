@@ -54,6 +54,10 @@ render_buffer* create_render_buffer(int32_t width, int32_t height)
 	buff->width = width;
 	buff->height = height;
 	glGenTextures(1, &buff->id);
+	glBindTexture(GL_TEXTURE_2D, buff->id);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glBindTexture(GL_TEXTURE_2D, 0);
 	update_render_buffer(buff);
 	return buff;
 }
@@ -69,21 +73,15 @@ void update_render_buffer(render_buffer* buff)
 {
 	glBindTexture(GL_TEXTURE_2D, buff->id);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, buff->width, buff->height, 0, GL_RGB, GL_UNSIGNED_BYTE, buff->buffer);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void put_pixel(render_buffer* buff, int32_t x, int32_t y, ppu_color color)
+void put_pixel(render_buffer* buff, int32_t x, int32_t y, ppu_rgb_color color)
 {
-	if (0 <= x && x < buff->width && 0 <= y && y < buff->height)
-	{
-		int32_t position = ((x + y * buff->width) * buff->bpp);
-		ppu_rgb_color c = hex_to_float_rgb(color);
-		buff->buffer[position] = c.r;
-		buff->buffer[position + 1] = c.g;
-		buff->buffer[position + 2] = c.b;
-	}
+	int32_t position = ((x + y * buff->width) * buff->bpp);
+	buff->buffer[position] = color.r;
+	buff->buffer[position + 1] = color.g;
+	buff->buffer[position + 2] = color.b;
 }
 
 void draw_buffer(uint32_t id)

@@ -279,6 +279,26 @@ void CPU_BGE(eeprom* rom)
 	}
 }
 
+void CPU_CLRCMP()
+{
+	INCREASE_IP_AND_PC();
+	registers[STATUS_FLAG_REGISTER].r16 &= ~GE_FLAG;
+	registers[STATUS_FLAG_REGISTER].r16 &= ~LE_FLAG;
+	registers[STATUS_FLAG_REGISTER].r16 &= ~NE_FLAG;
+	registers[STATUS_FLAG_REGISTER].r16 &= ~EQ_FLAG;
+}
+
+void CPU_INCSP()
+{
+	INCREASE_IP_AND_PC();
+	*registers[STACK_PTR].r8_ptr++;
+}
+
+void CPU_DECSP()
+{
+	INCREASE_IP_AND_PC();
+	*registers[STACK_PTR].r8_ptr--;
+}
 
 void cpu_process(eeprom* rom)
 {
@@ -317,6 +337,9 @@ void cpu_process(eeprom* rom)
 		case BNE: CPU_BNE(rom); break;
 		case BLE: CPU_BLE(rom); break;
 		case BGE: CPU_BGE(rom); break;
+		case CLRCMP: CPU_CLRCMP(); break;
+		case INCSP: CPU_INCSP(); break;
+		case DECSP: CPU_DECSP(); break;
 		}
 	}
 }

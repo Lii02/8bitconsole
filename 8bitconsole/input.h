@@ -10,6 +10,7 @@ typedef struct
 	int32_t key;
 	int8_t flag;
 } button_t;
+button_t create_button_map(const char* tag, int32_t key, int8_t flag);
 
 typedef struct
 {
@@ -31,6 +32,7 @@ typedef struct
 	};
 } inputmap_t;
 inputmap_t default_input_map();
+button_t* get_button_by_tag(inputmap_t* im, const char* tag);
 
 void update_input(emulator_window* window, inputmap_t* inputmap);
 
